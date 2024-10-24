@@ -21,7 +21,7 @@ const RootRouter = createRouter().openapi(
       ),
     },
   }),
-  (c) => {
+  async (c) => {
     return c.json({
       success: true,
       data: {

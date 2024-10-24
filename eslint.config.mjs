@@ -21,6 +21,7 @@ export default antfu(
       "node/no-process-env": ["error"],
       "style/brace-style": ["error", "1tbs"],
       "style/operator-linebreak": ["off"],
+      "style/arrow-parens": ["error", "always"],
       "no-magic-numbers": [
         "error",
         {
