@@ -6,12 +6,16 @@ import path from "node:path";
 import { cwd, env } from "node:process";
 import { z } from "zod";
 
-expand(config({
-  path: path.resolve(cwd(), env.NODE_ENV === "test" ? ".env.test" : ".env"),
-}));
+expand(
+  config({
+    path: path.resolve(cwd(), env.NODE_ENV === "test" ? ".env.test" : ".env"),
+  }),
+);
 
 const EnvSchema = z.object({
-  NODE_ENV: z.enum(["dev", "stage", "uat", "preprod", "prod", "test"]).default("dev"),
+  NODE_ENV: z
+    .enum(["dev", "stage", "uat", "preprod", "prod", "test"])
+    .default("dev"),
 
   SERVER_PORT: z.coerce.number().default(3000),
 

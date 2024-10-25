@@ -1,11 +1,14 @@
-import { logger } from "hono-pino";
+import { pinoLogger } from "hono-pino";
 import { randomUUID } from "node:crypto";
 import pino from "pino";
 
-export type StreamArray<T = pino.Level> = (pino.DestinationStream | pino.StreamEntry<T>)[] | pino.DestinationStream | pino.StreamEntry<T>;
+export type StreamArray<T = pino.Level> =
+  | (pino.DestinationStream | pino.StreamEntry<T>)[]
+  | pino.DestinationStream
+  | pino.StreamEntry<T>;
 
 export function PinoLogger(level: pino.Level, streams: StreamArray) {
-  return logger({
+  return pinoLogger({
     pino: pino(
       {
         level,
@@ -20,8 +23,5 @@ export function PinoLogger(level: pino.Level, streams: StreamArray) {
 }
 
 export function Logger(level: pino.Level, streams: StreamArray) {
-  return pino(
-    { name: "app-logs", level },
-    pino.multistream(streams),
-  );
+  return pino({ name: "app-logs", level }, pino.multistream(streams));
 }

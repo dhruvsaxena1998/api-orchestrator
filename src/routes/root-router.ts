@@ -13,9 +13,9 @@ const RootRouter = createRouter().openapi(
     responses: {
       [HTTPStatusCodes.OK]: jsonContent(
         createSuccessSchema(
-          z.object({
-            message: z.string(),
-          }),
+          z
+            .object({ message: z.string() })
+            .openapi({ example: { message: "Hello World" } }),
         ),
         "Root Path",
       ),

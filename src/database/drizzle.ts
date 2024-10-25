@@ -13,16 +13,15 @@ let client: Connection;
 
 class QueryLogger implements DrizzleLogger {
   logQuery(query: string, params: unknown[]): void {
-    logger.debug(JSON.stringify({ query, params }));
+    logger.info(JSON.stringify({ query, params }));
   }
 }
 
-function getDatabaseInstance(client: Connection) {
-  // eslint-disable-next-line ts/ban-ts-comment
-  // @ts-expect-error
+function getDrizzleInstance(client: Connection) {
   return drizzle<typeof schema, Connection>(client, {
     logger: new QueryLogger(),
     schema,
+    mode: "default",
   });
 }
 
@@ -36,8 +35,8 @@ export async function getConnection() {
       database: ENV.DB_NAME,
     });
 
-    return getDatabaseInstance(client);
+    return getDrizzleInstance(client);
   }
 
-  return getDatabaseInstance(client);
+  return getDrizzleInstance(client);
 }

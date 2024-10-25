@@ -6,10 +6,13 @@ import type { AppOpenAPI } from "../../@types/app";
 
 import { UNPROCESSABLE_ENTITY } from "../../constants/http-status-codes";
 
-function configureOpenApiSpec(app: AppOpenAPI, info: {
-  title: string;
-  version: string;
-}) {
+function configureOpenApiSpec(
+  app: AppOpenAPI,
+  info: {
+    title: string;
+    version: string;
+  },
+) {
   app.doc("/openapi", {
     openapi: "3.0.0",
     info: {

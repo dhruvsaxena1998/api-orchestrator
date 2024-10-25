@@ -4,6 +4,7 @@ import { secureHeaders } from "hono/secure-headers";
 import ENV from "@/env";
 import createApp from "@/lib/utils/create-app";
 import configureOpenApiSpec from "@/lib/utils/openapi/configure-openapi-spec";
+import ProjectsRouter from "@/routes/projects/projects";
 import RootRouter from "@/routes/root-router";
 import { pinoHttpLogger } from "@/utils/logger";
 
@@ -22,8 +23,7 @@ if (ENV.NODE_ENV !== "prod") {
   });
 }
 
-const _app = app
-  .route("/", RootRouter)
+const _app = app.route("/", RootRouter).route("/", ProjectsRouter);
 
 export { app };
 export type App = typeof _app;
