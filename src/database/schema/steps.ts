@@ -1,57 +1,70 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  int,
+  integer,
   json,
-  mysqlTable,
+  pgTable,
+  serial,
   timestamp,
-  uniqueIndex,
+  unique,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 
-import { workflows } from "./workflow.sql";
+import { WFVersions } from "./wf-version.sql";
+import { Workflows } from "./workflow.sql";
 
 type NextStep = { next: "complete" | "error" } | { next: "step"; slug: string };
 interface ValidateStep {
   response?: Record<string, unknown>;
 }
-export const steps = mysqlTable(
+export const Steps = pgTable(
   "steps",
   {
-    id: int("id", { unsigned: true }).primaryKey().autoincrement(),
-    slug: varchar("slug", { length: 150 }).notNull(),
-    api: varchar("api", { length: 150 }).notNull(),
-    workflow_id: int("workflow_id", { unsigned: true }).references(
-      () => workflows.id,
-    ),
-    validate: json("validate").$type<ValidateStep>().default({}),
-    on_success: json("on_success").$type<NextStep>().default({
+    id: serial().unique().primaryKey(),
+    slug: varchar({ length: 150 }).notNull(),
+    api: varchar({ length: 150 }).notNull(),
+    workflow_id: integer()
+      .references(() => Workflows.id)
+      .notNull(),
+    wf_version_id: integer()
+      .references(() => WFVersions.id)
+      .notNull(),
+    validate: json().$type<ValidateStep>().default({}),
+    on_success: json().$type<NextStep>().default({
       next: "complete",
     }),
-    on_failure: json("on_failure").$type<NextStep>().default({
+    on_failure: json().$type<NextStep>().default({
       next: "error",
     }),
-    created_at: timestamp("created_at", { mode: "string" })
-      .notNull()
-      .default(sql`now()`),
-    updated_at: timestamp("updated_at", { mode: "string" })
+    created_at: timestamp({ mode: "string" }).default(sql`now()`),
+    updated_at: timestamp({ mode: "string" })
       .default(sql`NOW()`)
-      .$onUpdate(() => "NOW()"),
+      .$onUpdate(() => sql`now()`),
   },
   (table) => ({
-    workflowIdSlugUniqueIndex: uniqueIndex("workflowIdSlugUniqueIndex").on(
-      table.workflow_id,
-      table.slug,
-    ),
+    workflowIdVersionIdSlugUniqueIndex: unique(
+      "workflowIdVersionIdSlugUniqueIndex",
+    ).on(table.workflow_id, table.wf_version_id, table.slug),
   }),
 );
 
-export const WorkflowHasManySteps = relations(workflows, ({ many }) => ({
-  steps: many(steps),
+export const WorkflowHasManySteps = relations(Workflows, ({ many }) => ({
+  steps: many(Steps),
 }));
 
-export const StepsBelongsToOneWorkflow = relations(steps, ({ one }) => ({
-  workflow: one(workflows, {
-    fields: [steps.workflow_id],
-    references: [workflows.id],
+export const VersionHasManySteps = relations(WFVersions, ({ many }) => ({
+  steps: many(Steps),
+}));
+
+export const StepsBelongsToOneWorkflow = relations(Steps, ({ one }) => ({
+  workflow: one(Workflows, {
+    fields: [Steps.workflow_id],
+    references: [Workflows.id],
+  }),
+}));
+
+export const StepsBelongsToOneVersion = relations(Steps, ({ one }) => ({
+  version: one(WFVersions, {
+    fields: [Steps.wf_version_id],
+    references: [WFVersions.id],
   }),
 }));

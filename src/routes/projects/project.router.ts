@@ -15,7 +15,6 @@ import {
   jsonContentRequired,
 } from "@/lib/utils/openapi/helpers";
 import {
-  createdProjectSchema,
   createProjectSchema,
   getProjectSchema,
   selectProjectBySlugSchema,
@@ -32,7 +31,7 @@ export const CreateProject = createRoute({
   },
   responses: {
     [OK]: jsonContent(
-      createSuccessSchema(createdProjectSchema),
+      createSuccessSchema(getProjectSchema),
       "Created Project",
     ),
     [UNPROCESSABLE_ENTITY]: jsonContent(

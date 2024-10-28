@@ -1,53 +1,68 @@
+import { z } from "@hono/zod-openapi";
 import { relations, sql } from "drizzle-orm";
 import {
-  int,
+  integer,
   json,
-  mysqlTable,
-  text,
+  pgTable,
+  serial,
   timestamp,
-  uniqueIndex,
+  unique,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { projects } from "./projects.sql";
+import { Projects } from "./projects.sql";
 
-interface Metadata {
-  tags?: string[];
-  author?: string;
-  documentation?: string;
-}
-export const workflows = mysqlTable(
+const MetadataSchema = z.object({
+  tags: z.array(z.string()).optional(),
+  author: z.string().optional(),
+  documentation: z.string().optional(),
+});
+export const Workflows = pgTable(
   "workflows",
   {
-    id: int("id", { unsigned: true }).primaryKey().autoincrement(),
-    slug: varchar("slug", { length: 150 }).notNull(),
-    version: varchar("version", { length: 5 }).notNull().default("v1"),
-    project_id: int("project_id", { unsigned: true })
-      .references(() => projects.id)
+    id: serial().unique().primaryKey(),
+    slug: varchar({ length: 150 }).notNull(),
+    project_id: integer()
+      .references(() => Projects.id)
       .notNull(),
-    description: text("description"),
-    metadata: json("metadata").$type<Metadata>().default({}),
-    created_at: timestamp("created_at", { mode: "string" })
-      .notNull()
-      .default(sql`now()`),
-    updated_at: timestamp("updated_at", { mode: "string" })
+    description: varchar({ length: 255 }).notNull(),
+    metadata: json().$type<z.infer<typeof MetadataSchema>>().default({}),
+    created_at: timestamp({ mode: "string" }).default(sql`now()`),
+    updated_at: timestamp({ mode: "string" })
       .default(sql`NOW()`)
-      .$onUpdate(() => "NOW()"),
+      .$onUpdate(() => sql`now()`),
   },
   (table) => ({
-    projectVersionSlugUniqueIndex: uniqueIndex(
-      "projectVersionSlugUniqueIndex",
-    ).on(table.project_id, table.version, table.slug),
+    projectSlugUniqueIndex: unique("projectVersionSlugUniqueIndex").on(
+      table.project_id,
+      table.slug,
+    ),
   }),
 );
 
-export const ProjectHasManyWorkflows = relations(projects, ({ many }) => ({
-  workflows: many(workflows),
+export const insertWorkflowSchema = createInsertSchema(Workflows, {
+  slug: z.string().min(1),
+  metadata: MetadataSchema.optional(),
+}).omit({
+  id: true,
+  created_at: true,
+});
+export type InsertWorkflowSchema = z.infer<typeof insertWorkflowSchema>;
+
+export const selectWorkflowSchema = createSelectSchema(Workflows, {
+  metadata: MetadataSchema.optional(),
+});
+export type SelectWorkflowSchema = z.infer<typeof selectWorkflowSchema>;
+
+// Relations
+export const ProjectHasManyWorkflows = relations(Projects, ({ many }) => ({
+  workflows: many(Workflows),
 }));
 
-export const WorkflowBelongsToOneProject = relations(workflows, ({ one }) => ({
-  project: one(projects, {
-    fields: [workflows.project_id],
-    references: [projects.id],
+export const WorkflowBelongsToOneProject = relations(Workflows, ({ one }) => ({
+  project: one(Projects, {
+    fields: [Workflows.project_id],
+    references: [Projects.id],
   }),
 }));

@@ -19,10 +19,13 @@ const errorFileStream = createStream("error.log", {
 });
 
 const streams: StreamArray = [
-  { stream: pretty(), level: "debug" },
   { stream: logFileStream },
   { stream: errorFileStream, level: "error" },
 ];
+
+if (ENV.NODE_ENV === "dev") {
+  streams.push({ stream: pretty({ colorize: true }), level: "debug" });
+}
 
 export const logger = Logger(ENV.LOG_LEVEL, streams);
 export const pinoHttpLogger = () => PinoLogger(ENV.LOG_LEVEL, streams);

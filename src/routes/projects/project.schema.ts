@@ -12,10 +12,6 @@ export const createProjectSchema = insertProjectSchema.openapi({
   },
 });
 
-export const createdProjectSchema = z.object({
-  insertedId: z.number().openapi({ example: 1 }),
-});
-
 export const getProjectSchema = selectProjectSchema.openapi({
   example: {
     id: 1,

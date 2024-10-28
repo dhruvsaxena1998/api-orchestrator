@@ -15,7 +15,6 @@ export const CreateProjectHandler: AppRouteHandler<CreateProjectRoute> = async (
   const json = ctx.req.valid("json");
 
   const result = await projectService.createProject(json);
-
   if (result.isErr()) {
     return ctx.json(
       {
@@ -28,7 +27,7 @@ export const CreateProjectHandler: AppRouteHandler<CreateProjectRoute> = async (
     );
   }
 
-  return ctx.json({ success: true, data: { insertedId: result.value } }, OK);
+  return ctx.json({ success: true, data: result.value }, OK);
 };
 
 export const GetProjectBySlugHandler: AppRouteHandler<
@@ -37,7 +36,6 @@ export const GetProjectBySlugHandler: AppRouteHandler<
   const { slug } = ctx.req.valid("param");
 
   const result = await projectService.getProjectBySlug(slug);
-
   if (result.isErr()) {
     return ctx.json(
       {

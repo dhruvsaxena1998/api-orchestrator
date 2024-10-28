@@ -1,3 +1,4 @@
-export { projects } from "./projects.sql";
-export { steps } from "./steps";
-export { workflows } from "./workflow.sql";
+export { Projects } from "./projects.sql";
+export { Steps } from "./steps";
+export { WFVersions } from "./wf-version.sql";
+export { Workflows } from "./workflow.sql";

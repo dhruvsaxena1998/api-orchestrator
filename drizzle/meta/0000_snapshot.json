@@ -1,39 +1,36 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "id": "59108da2-d9ac-4c95-ab91-6d7a142f06e2",
+  "id": "1ab1acaa-e1da-4de6-8516-a3aa0cba55a9",
   "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "projects": {
+    "public.projects": {
       "name": "projects",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "slug": {
           "name": "slug",
           "type": "varchar(150)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
+          "notNull": false,
           "default": "now()"
         },
         "updated_at": {
@@ -41,91 +38,90 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "NOW()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "projects_id": {
-          "name": "projects_id",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "projects_id_unique": {
+          "name": "projects_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "id"
           ]
-        }
-      },
-      "uniqueConstraints": {
-        "projects_slug_unique": {
-          "name": "projects_slug_unique",
+        },
+        "slug_unique_index": {
+          "name": "slug_unique_index",
+          "nullsNotDistinct": false,
           "columns": [
             "slug"
           ]
         }
       },
-      "checkConstraint": {}
+      "checkConstraints": {}
     },
-    "steps": {
+    "public.steps": {
       "name": "steps",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
         },
         "slug": {
           "name": "slug",
           "type": "varchar(150)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "api": {
           "name": "api",
           "type": "varchar(150)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "workflow_id": {
           "name": "workflow_id",
-          "type": "int unsigned",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true
+        },
+        "wf_version_id": {
+          "name": "wf_version_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
         },
         "validate": {
           "name": "validate",
           "type": "json",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "('{}')"
+          "default": "'{}'::json"
         },
         "on_success": {
           "name": "on_success",
           "type": "json",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "('{\"next\":\"complete\"}')"
+          "default": "'{\"next\":\"complete\"}'::json"
         },
         "on_failure": {
           "name": "on_failure",
           "type": "json",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "('{\"next\":\"error\"}')"
+          "default": "'{\"next\":\"error\"}'::json"
         },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
+          "notNull": false,
           "default": "now()"
         },
         "updated_at": {
@@ -133,20 +129,10 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "NOW()"
         }
       },
-      "indexes": {
-        "workflowIdSlugUniqueIndex": {
-          "name": "workflowIdSlugUniqueIndex",
-          "columns": [
-            "workflow_id",
-            "slug"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "steps_workflow_id_workflows_id_fk": {
           "name": "steps_workflow_id_workflows_id_fk",
@@ -160,72 +146,69 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "steps_wf_version_id_wf_versions_id_fk": {
+          "name": "steps_wf_version_id_wf_versions_id_fk",
+          "tableFrom": "steps",
+          "tableTo": "wf_versions",
+          "columnsFrom": [
+            "wf_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "steps_id": {
-          "name": "steps_id",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "steps_id_unique": {
+          "name": "steps_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "id"
           ]
+        },
+        "workflowIdVersionIdSlugUniqueIndex": {
+          "name": "workflowIdVersionIdSlugUniqueIndex",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workflow_id",
+            "wf_version_id",
+            "slug"
+          ]
         }
       },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
+      "checkConstraints": {}
     },
-    "workflows": {
-      "name": "workflows",
+    "public.wf_versions": {
+      "name": "wf_versions",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
         },
-        "slug": {
-          "name": "slug",
-          "type": "varchar(150)",
+        "workflow_id": {
+          "name": "workflow_id",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "version": {
           "name": "version",
-          "type": "varchar(5)",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'v1'"
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "('{}')"
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
+          "notNull": false,
           "default": "now()"
         },
         "updated_at": {
@@ -233,21 +216,96 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "NOW()"
         }
       },
-      "indexes": {
-        "projectVersionSlugUniqueIndex": {
-          "name": "projectVersionSlugUniqueIndex",
-          "columns": [
-            "project_id",
-            "version",
-            "slug"
+      "indexes": {},
+      "foreignKeys": {
+        "wf_versions_workflow_id_workflows_id_fk": {
+          "name": "wf_versions_workflow_id_workflows_id_fk",
+          "tableFrom": "wf_versions",
+          "tableTo": "workflows",
+          "columnsFrom": [
+            "workflow_id"
           ],
-          "isUnique": true
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "wf_versions_id_unique": {
+          "name": "wf_versions_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        },
+        "workflowIdVersionUniqueIndex": {
+          "name": "workflowIdVersionUniqueIndex",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workflow_id",
+            "version"
+          ]
+        }
+      },
+      "checkConstraints": {}
+    },
+    "public.workflows": {
+      "name": "workflows",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::json"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "NOW()"
+        }
+      },
+      "indexes": {},
       "foreignKeys": {
         "workflows_project_id_projects_id_fk": {
           "name": "workflows_project_id_projects_id_fk",
@@ -263,26 +321,34 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "workflows_id": {
-          "name": "workflows_id",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "workflows_id_unique": {
+          "name": "workflows_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "id"
           ]
+        },
+        "projectVersionSlugUniqueIndex": {
+          "name": "projectVersionSlugUniqueIndex",
+          "nullsNotDistinct": false,
+          "columns": [
+            "project_id",
+            "slug"
+          ]
         }
       },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
+      "checkConstraints": {}
     }
   },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
   "views": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
-    "tables": {},
-    "indexes": {}
+    "tables": {}
   }
 }
