@@ -24,11 +24,11 @@ function configureOpenApiSpec(
   app.get(
     "/reference",
     apiReference({
-      theme: "saturn",
-      layout: "classic",
+      theme: "kepler",
+      layout: "modern",
       defaultHttpClient: {
-        clientKey: "fetch",
-        targetKey: "javascript",
+        clientKey: "curl",
+        targetKey: "shell",
       },
       spec: {
         url: "/openapi",
